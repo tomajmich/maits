@@ -1,0 +1,29 @@
+[project]
+name = "maits"
+version = "0.1.0"
+description = "Multi-asset investment trading system - cTrader (Forex) connector"
+requires-python = ">=3.11"
+dependencies = [
+    "ctrader-open-api>=0.9.2",
+    "service_identity",          # lets Twisted verify the TLS hostname of the cTrader servers
+    "fastapi",
+    "uvicorn",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio", "httpx"]
+
+[project.scripts]
+maits = "maits.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["maits"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
