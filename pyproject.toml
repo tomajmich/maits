@@ -9,6 +9,7 @@ dependencies = [
     "fastapi",
     "uvicorn",
     "python-dotenv",
+    "mcp>=2.3",                  # `maits mcp`: MCP server for AI agents (2.x API: MCPServer)
 ]
 
 [project.optional-dependencies]

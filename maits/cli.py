@@ -162,6 +162,12 @@ async def cmd_serve(args, settings: Settings) -> None:
     await serve(settings)
 
 
+async def cmd_mcp(args, settings: Settings) -> None:
+    from maits.mcp_server import serve  # imported lazily: only this command needs the MCP SDK
+
+    await serve(settings)
+
+
 # ---- argument parsing -------------------------------------------------------------------------
 
 
@@ -209,6 +215,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = add("serve", cmd_serve, "run the HTTP API (order endpoint + TradingView webhook)")
     p.add_argument("--host")
     p.add_argument("--port", type=int)
+    add("mcp", cmd_mcp, "run the MCP server on stdio (for AI agents; trading tools work on demo only)")
     return parser
 
 

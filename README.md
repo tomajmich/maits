@@ -14,6 +14,7 @@ maits bars EURUSD -p H1 -c 50
 maits buy EURUSD 0.01 --sl-pips 15 --tp-pips 30
 maits close 12345   |  maits close --symbol EURUSD  |  maits close --all
 maits serve         HTTP API + TradingView webhook
+maits mcp           MCP server on stdio, for AI agents (trading tools: demo only)
 ```
 Add `--json` to any command for machine-readable output.
 
@@ -57,6 +58,26 @@ Alert message (JSON), webhook URL `https://your-host/webhook/tradingview`:
 with HTTPS (e.g. Caddy: `your-host { reverse_proxy 127.0.0.1:8000 }`). Anyone who learns the secret can
 trade your account, so use a long random one and keep `MAITS_MAX_LOTS` low.
 
+## MCP server (AI agents)
+
+`maits mcp` speaks the Model Context Protocol over stdio (stdout is the protocol; logs go to stderr).
+Tools: `status` (environment and limits, no connection), `account`, `positions`, `orders`, `symbols`,
+`quote`, `bars`, and `place_market_order`, `close_position`, `close_positions` (needs `symbol` or `all=true`).
+The trading tools refuse to run unless `CTRADER_ENV=demo`. The usual guards (`MAITS_MAX_LOTS`,
+`MAITS_ALLOWED_SYMBOLS`, demo/live check) still apply. The cTrader connection opens on the first tool call;
+if login fails, the call returns an error and the next call tries again.
+
+Register it with any MCP client as a stdio server whose working directory is the repo, so `.env` and
+`tokens.json` are found. The omp config in this repo (`.omp/mcp.json`) does this:
+
+```json
+{"mcpServers": {"maits": {"type": "stdio", "command": "/path/to/venv/bin/maits", "args": ["mcp"],
+  "cwd": "/path/to/maits", "timeout": 90000}}}
+```
+
+Use a long timeout. The first call logs in, which can take up to 30 s, and an order then waits up to 15 s
+for its fill.
+
 ## Where to run it
 
 cTrader does not host Open API programs: this is your own process that connects out to
@@ -85,8 +106,8 @@ share one loop.
 
 ## Tests
 
-`pytest` – unit tests for lot/pip conversion, the API's auth and error mapping, and the order flow against a
-scripted fake of the cTrader connection.
+`pytest` – unit tests for lot/pip conversion, the API's auth and error mapping, the MCP tools' demo-only gate and
+error reporting, and the order flow against a scripted fake of the cTrader connection.
 
 ## Known limits
 
